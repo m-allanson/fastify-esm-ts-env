@@ -1,0 +1,9 @@
+{
+  "extends": "fastify-tsconfig",
+  "compilerOptions": {
+    "outDir": "dist",
+    "sourceMap": true
+  },
+  "include": ["*.ts", "src/plugins/*.ts", "src/routes/*.ts"],
+  "exclude": ["node_modules"]
+}
