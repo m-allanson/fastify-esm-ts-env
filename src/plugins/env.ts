@@ -24,7 +24,7 @@ const schema = {
   },
 };
 
-const configPlugin: FastifyPluginCallback = async (fastify, options, done) => {
+const configPlugin: FastifyPluginCallback = (fastify, options, done) => {
   const configOptions = {
     confKey: "config",
     schema: schema,
