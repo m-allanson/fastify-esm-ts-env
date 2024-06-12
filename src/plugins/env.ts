@@ -1,5 +1,5 @@
 import fastifyEnv from "@fastify/env";
-import { FastifyInstance, FastifyPluginAsync } from "fastify";
+import { FastifyPluginCallback } from "fastify";
 import fp from "fastify-plugin";
 
 declare module "fastify" {
@@ -37,31 +37,7 @@ export const schema = {
   },
 };
 
-/**
- * Util method, allows callback style plugins to be called async-style
- *
- * e.g.
- *
- */
-const pluginCbToAsync = (
-  plugin: (
-    fastify: FastifyInstance,
-    options: Record<string, any>,
-    done: (err?: Error | undefined) => void
-  ) => unknown,
-  fastify: FastifyInstance,
-  options: Record<string, any>
-) => {
-  return new Promise<void>((resolve) => {
-    const done = () => resolve();
-    plugin(fastify, options, done);
-  });
-};
-
-const configPlugin: FastifyPluginAsync = async (
-  fastify,
-  options
-): Promise<void> => {
+const configPlugin: FastifyPluginCallback = (fastify, options, done) => {
   const configOptions = {
     confKey: "config",
     schema: schema,
@@ -70,7 +46,7 @@ const configPlugin: FastifyPluginAsync = async (
     removeAdditional: true,
   };
 
-  pluginCbToAsync(fastifyEnv, fastify, configOptions);
+  return fastifyEnv(fastify, configOptions, done);
 };
 
 export default fp(configPlugin, { name: "env-plugin" });
