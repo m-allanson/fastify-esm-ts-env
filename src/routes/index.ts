@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from "fastify";
-import fastifyPlugin from "fastify-plugin";
 
 const routes: FastifyPluginAsync = async (fastify) => {
   fastify.get("/", async (request, reply) => {
@@ -14,4 +13,4 @@ const routes: FastifyPluginAsync = async (fastify) => {
   });
 };
 
-export default fastifyPlugin(routes);
+export default routes;

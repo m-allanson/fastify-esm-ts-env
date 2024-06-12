@@ -1,6 +1,17 @@
 import fastifyEnv from "@fastify/env";
 import { FastifyPluginCallback } from "fastify";
-import fastifyPlugin from "fastify-plugin";
+import fp from "fastify-plugin";
+
+declare module "fastify" {
+  export interface FastifyInstance {
+    config: {
+      DEBUG_LEVEL: number | undefined;
+      HTTP_HOST: string;
+      HTTP_PORT: number;
+      API_KEY: string;
+    };
+  }
+}
 
 const schema = {
   type: "object",
@@ -36,4 +47,4 @@ const configPlugin: FastifyPluginCallback = (fastify, options, done) => {
   return fastifyEnv(fastify, configOptions, done);
 };
 
-export default fastifyPlugin(configPlugin);
+export default fp(configPlugin);

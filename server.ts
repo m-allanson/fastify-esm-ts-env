@@ -1,15 +1,40 @@
-import appFramework from "./src/app.js";
+import app from "./src/app.js";
+import Fastify from "fastify";
+
+const env =
+  process.env.NODE_ENV === "development" ? "development" : "production";
+
+const envToLogger = {
+  development: {
+    transport: {
+      target: "pino-pretty",
+      options: {
+        translateTime: "HH:MM:ss Z",
+        ignore: "pid,hostname",
+      },
+    },
+  },
+  production: true,
+};
 
 async function initAppServer() {
-  const app = await appFramework();
+  const fastify = Fastify({
+    logger: envToLogger[env],
+  });
+  fastify.register(app);
+
+  await fastify.ready();
 
   try {
-    await app.listen({
-      port: app.config.HTTP_PORT,
-      host: app.config.HTTP_HOST,
+    await fastify.listen({
+      // port: fastify.config.HTTP_PORT,
+      // host: fastify.config.HTTP_HOST,
+      port: 3000,
+      host: "localhost",
     });
+    console.log("config is", fastify.config);
   } catch (err) {
-    app.log.error(err);
+    fastify.log.error(err);
     process.exit(1);
   }
 }
