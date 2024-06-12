@@ -30,7 +30,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
     forceESM: true,
     maxDepth: 1,
     // Exclude env plugin because it was loaded earlier
-    ignoreFilter: (path) => path.endsWith("/env.ts"),
+    ignorePattern: /env.(j|t)s$/,
   });
 
   // Load routes
