@@ -1,7 +1,10 @@
-import * as path from "path";
 import AutoLoad, { AutoloadPluginOptions } from "@fastify/autoload";
 import { FastifyPluginAsync } from "fastify";
+import fp from "fastify-plugin";
+import * as path from "path";
 import { fileURLToPath } from "url";
+
+import envPlugin from "./plugins/env.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,19 +20,20 @@ const app: FastifyPluginAsync<AppOptions> = async (
   fastify,
   opts
 ): Promise<void> => {
-  //custom setup here
+  // This loads up config variables from the environment, run it first
+  await fastify.register(envPlugin);
 
-  // This loads all plugins defined in plugins
-  // those should be support plugins that are reused
-  // through your application
+  // Load all plugins in the plugins directory
   void fastify.register(AutoLoad, {
     dir: path.join(__dirname, "plugins"),
     options: opts,
     forceESM: true,
+    maxDepth: 1,
+    // Exclude env plugin because it was loaded earlier
+    ignoreFilter: (path) => path.endsWith("/env.ts"),
   });
 
-  // This loads all plugins defined in routes
-  // define your routes in one of these
+  // Load routes
   void fastify.register(AutoLoad, {
     dir: path.join(__dirname, "routes"),
     options: opts,
@@ -37,5 +41,4 @@ const app: FastifyPluginAsync<AppOptions> = async (
   });
 };
 
-export default app;
-export { app };
+export default fp(app);

@@ -1,5 +1,5 @@
 import fastifyEnv from "@fastify/env";
-import { FastifyPluginCallback } from "fastify";
+import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 
 declare module "fastify" {
@@ -13,7 +13,9 @@ declare module "fastify" {
   }
 }
 
-const schema = {
+export interface EnvPluginOptions {}
+
+export const schema = {
   type: "object",
   required: ["HTTP_PORT", "HTTP_HOST", "API_KEY"],
   properties: {
@@ -35,7 +37,31 @@ const schema = {
   },
 };
 
-const configPlugin: FastifyPluginCallback = (fastify, options, done) => {
+/**
+ * Util method, allows callback style plugins to be called async-style
+ *
+ * e.g.
+ *
+ */
+const pluginCbToAsync = (
+  plugin: (
+    fastify: FastifyInstance,
+    options: Record<string, any>,
+    done: (err?: Error | undefined) => void
+  ) => unknown,
+  fastify: FastifyInstance,
+  options: Record<string, any>
+) => {
+  return new Promise<void>((resolve) => {
+    const done = () => resolve();
+    plugin(fastify, options, done);
+  });
+};
+
+const configPlugin: FastifyPluginAsync = async (
+  fastify,
+  options
+): Promise<void> => {
   const configOptions = {
     confKey: "config",
     schema: schema,
@@ -44,7 +70,7 @@ const configPlugin: FastifyPluginCallback = (fastify, options, done) => {
     removeAdditional: true,
   };
 
-  return fastifyEnv(fastify, configOptions, done);
+  pluginCbToAsync(fastifyEnv, fastify, configOptions);
 };
 
-export default fp(configPlugin);
+export default fp(configPlugin, { name: "env-plugin" });
