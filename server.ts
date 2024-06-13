@@ -23,7 +23,7 @@ async function initAppServer() {
     logger: envToLogger[env],
   });
 
-  await fastify.register(app);
+  fastify.register(app);
   await fastify.ready();
 
   try {
